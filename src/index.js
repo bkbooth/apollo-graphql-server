@@ -25,6 +25,8 @@ const schema = gql `
 
   type Mutation {
     createMessage(text: String!): Message!
+    updateMessage(id: ID!, text: String!): Message!
+    deleteMessage(id: ID!): Boolean!
   }
 
   type User {
@@ -42,7 +44,7 @@ const schema = gql `
   }
 `
 
-const users = {
+let users = {
   1: {
     id: '1',
     username: 'Roger Bolson',
@@ -57,7 +59,7 @@ const users = {
   },
 }
 
-const messages = {
+let messages = {
   1: {
     id: '1',
     text: 'Hello world!',
@@ -92,6 +94,33 @@ const resolvers = {
 
       return message
     },
+
+    updateMessage: (parent, args) => {
+      const {
+        [args.id]: message,
+        ...otherMessages
+      } = messages
+      if (!message) throw new Error(`Message '${args.id}' doesn't exist`)
+
+      message.text = args.text
+      messages = {
+        message,
+        ...otherMessages
+      }
+
+      return message
+    },
+
+    deleteMessage: (parent, args) => {
+      const {
+        [args.id]: message,
+        ...otherMessages
+      } = messages
+      if (!message) throw new Error(`Message '${args.id}' doesn't exist`)
+
+      messages = otherMessages
+      return true
+    }
   },
 
   User: {
