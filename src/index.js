@@ -15,19 +15,33 @@ app.use(cors())
 const schema = gql `
   type Query {
     me: User
+    user(id: ID!): User
   }
 
   type User {
+    id: ID!
     username: String!
   }
 `
 
+const users = {
+  1: {
+    id: '1',
+    username: 'Roger Bolson',
+  },
+  2: {
+    id: '2',
+    username: 'Barry Johnson',
+  },
+}
+
+const me = users[1];
+
 const resolvers = {
   Query: {
-    me: () => {
-      return {
-        username: 'Foo Barson',
-      }
+    me: () => me,
+    user: (parent, args) => {
+      return users[args.id];
     },
   },
 }
