@@ -22,6 +22,7 @@ const schema = gql `
   type User {
     id: ID!
     username: String!
+    firstName: String
   }
 `
 
@@ -36,23 +37,24 @@ const users = {
   },
 }
 
-const me = users[1];
-
 const resolvers = {
   Query: {
-    users: () => {
-      return Object.values(users)
-    },
-    user: (parent, args) => {
-      return users[args.id];
-    },
-    me: () => me,
+    users: () => Object.values(users),
+    user: (parent, args) => users[args.id],
+    me: (parent, args, context) => context.me,
+  },
+
+  User: {
+    firstName: parent => parent.username.split(' ')[0],
   },
 }
 
 const server = new ApolloServer({
   typeDefs: schema,
   resolvers,
+  context: {
+    me: users[1],
+  },
 })
 
 server.applyMiddleware({
