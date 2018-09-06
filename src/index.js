@@ -4,6 +4,7 @@ import {
   ApolloServer,
   gql,
 } from 'apollo-server-express'
+import uuidv4 from 'uuid/v4'
 
 const HOST = process.env.HOST || 'localhost'
 const PORT = process.env.PORT || 8000
@@ -20,6 +21,10 @@ const schema = gql `
 
     messages: [Message!]!
     message(id: ID!): Message!
+  }
+
+  type Mutation {
+    createMessage(text: String!): Message!
   }
 
   type User {
@@ -40,10 +45,12 @@ const users = {
   1: {
     id: '1',
     username: 'Roger Bolson',
+    messageIds: ['1'],
   },
   2: {
     id: '2',
     username: 'Barry Johnson',
+    messageIds: ['2'],
   },
 }
 
@@ -67,6 +74,21 @@ const resolvers = {
     me: (parent, args, context) => context.me,
     messages: () => Object.values(messages),
     message: (parent, args) => messages[args.id],
+  },
+
+  Mutation: {
+    createMessage: (parent, args, context) => {
+      const message = {
+        id: uuidv4(),
+        text: args.text,
+        userId: context.me.id,
+      }
+
+      messages[message.id] = message;
+      users[context.me.id].messageIds.push(message.id);
+
+      return message
+    },
   },
 
   User: {
