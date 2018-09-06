@@ -1,4 +1,5 @@
 import express from 'express'
+import cors from 'cors'
 import {
   ApolloServer,
   gql,
@@ -7,7 +8,9 @@ import {
 const HOST = process.env.HOST || 'localhost'
 const PORT = process.env.PORT || 8000
 const GRAPHQL_PATH = 'graphql'
+
 const app = express()
+app.use(cors())
 
 const schema = gql `
   type Query {
