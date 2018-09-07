@@ -2,9 +2,11 @@ import express from 'express'
 import cors from 'cors'
 import {
   ApolloServer,
-  gql,
 } from 'apollo-server-express'
-import uuidv4 from 'uuid/v4'
+
+import schema from './schema'
+import resolvers from './resolvers'
+import models from './models'
 
 const HOST = process.env.HOST || 'localhost'
 const PORT = process.env.PORT || 8000
@@ -13,131 +15,12 @@ const GRAPHQL_PATH = 'graphql'
 const app = express()
 app.use(cors())
 
-const schema = gql `
-  type Query {
-    users: [User!]
-    user(id: ID!): User
-    me: User
-
-    messages: [Message!]!
-    message(id: ID!): Message!
-  }
-
-  type Mutation {
-    createMessage(text: String!): Message!
-    updateMessage(id: ID!, text: String!): Message!
-    deleteMessage(id: ID!): Boolean!
-  }
-
-  type User {
-    id: ID!
-    username: String!
-    firstName: String
-    age: Int
-    messages: [Message!]
-  }
-
-  type Message {
-    id: ID!
-    text: String!
-    user: User!
-  }
-`
-
-let users = {
-  1: {
-    id: '1',
-    username: 'Roger Bolson',
-    age: 42,
-    messageIds: ['1'],
-  },
-  2: {
-    id: '2',
-    username: 'Barry Johnson',
-    age: 56,
-    messageIds: ['2'],
-  },
-}
-
-let messages = {
-  1: {
-    id: '1',
-    text: 'Hello world!',
-    userId: '1',
-  },
-  2: {
-    id: '2',
-    text: 'Goodbye world!',
-    userId: '2',
-  },
-}
-
-const resolvers = {
-  Query: {
-    users: () => Object.values(users),
-    user: (parent, args) => users[args.id],
-    me: (parent, args, context) => context.me,
-    messages: () => Object.values(messages),
-    message: (parent, args) => messages[args.id],
-  },
-
-  Mutation: {
-    createMessage: (parent, args, context) => {
-      const message = {
-        id: uuidv4(),
-        text: args.text,
-        userId: context.me.id,
-      }
-
-      messages[message.id] = message;
-      users[context.me.id].messageIds.push(message.id);
-
-      return message
-    },
-
-    updateMessage: (parent, args) => {
-      const {
-        [args.id]: message,
-        ...otherMessages
-      } = messages
-      if (!message) throw new Error(`Message '${args.id}' doesn't exist`)
-
-      message.text = args.text
-      messages = {
-        message,
-        ...otherMessages
-      }
-
-      return message
-    },
-
-    deleteMessage: (parent, args) => {
-      const {
-        [args.id]: message,
-        ...otherMessages
-      } = messages
-      if (!message) throw new Error(`Message '${args.id}' doesn't exist`)
-
-      messages = otherMessages
-      return true
-    }
-  },
-
-  User: {
-    firstName: user => user.username.split(' ')[0],
-    messages: user => Object.values(messages).filter(message => message.userId === user.id),
-  },
-
-  Message: {
-    user: message => users[message.userId],
-  }
-}
-
 const server = new ApolloServer({
   typeDefs: schema,
   resolvers,
   context: {
-    me: users[1],
+    models,
+    me: models.users[1],
   },
 })
 
