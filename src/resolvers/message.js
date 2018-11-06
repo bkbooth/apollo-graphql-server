@@ -1,6 +1,6 @@
 import { combineResolvers } from 'graphql-resolvers'
 
-import { isAuthenticated } from './authorization'
+import { isAuthenticated, isMessageOwner } from './authorization'
 
 export default {
   Query: {
@@ -17,16 +17,24 @@ export default {
       }),
     ),
 
-    updateMessage: (parent, { id, text }, { models }) => models.Message.update({
-      text,
-    },{
-      where: { id },
-      returning: true,
-    }).then(([_, [message]]) => message),
+    updateMessage: combineResolvers(
+      isAuthenticated,
+      isMessageOwner,
+      (parent, { id, text }, { models }) => models.Message.update({
+        text,
+      },{
+        where: { id },
+        returning: true,
+      }).then(([_, [message]]) => message),
+    ),
 
-    deleteMessage: (parent, { id }, { models }) => models.Message.destroy({
-      where: { id },
-    }),
+    deleteMessage: combineResolvers(
+      isAuthenticated,
+      isMessageOwner,
+      (parent, { id }, { models }) => models.Message.destroy({
+        where: { id },
+      }),
+    ),
   },
 
   Message: {
