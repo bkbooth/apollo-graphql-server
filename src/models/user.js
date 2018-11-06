@@ -57,6 +57,10 @@ const user = (sequelize, DataTypes) => {
     return bcrypt.hash(this.password, SALT_ROUNDS)
   }
 
+  User.prototype.validatePassword = function(inputPassword) {
+    return bcrypt.compare(inputPassword, this.password)
+  }
+
   return User
 }
 
