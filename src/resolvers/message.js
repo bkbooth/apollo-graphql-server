@@ -1,4 +1,6 @@
-import { ForbiddenError } from 'apollo-server'
+import { combineResolvers } from 'graphql-resolvers'
+
+import { isAuthenticated } from './authorization'
 
 export default {
   Query: {
@@ -7,14 +9,13 @@ export default {
   },
 
   Mutation: {
-    createMessage: (parent, { text }, { me, models }) => {
-      if (!me) throw new ForbiddenError('You must be signed in to create messages.')
-
-      return models.Message.create({
+    createMessage: combineResolvers(
+      isAuthenticated,
+      (parent, { text }, { models, me }) => models.Message.create({
         text,
         userId: me.id,
-      })
-    },
+      }),
+    ),
 
     updateMessage: (parent, { id, text }, { models }) => models.Message.update({
       text,

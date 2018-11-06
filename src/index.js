@@ -35,6 +35,7 @@ const server = new ApolloServer({
     // remove the internal sequelize error message
     // leave only the important validation error
     const message = error.message
+      .replace('Context creation failed: ', '')
       .replace('SequelizeValidationError: ', '')
       .replace('Validation error: ', '')
 
