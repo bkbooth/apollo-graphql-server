@@ -1,4 +1,4 @@
-import uuidv4 from 'uuid/v4'
+import { ForbiddenError } from 'apollo-server'
 
 export default {
   Query: {
@@ -7,10 +7,14 @@ export default {
   },
 
   Mutation: {
-    createMessage: (parent, { text }, { me, models }) => models.Message.create({
-      text,
-      userId: me.id,
-    }),
+    createMessage: (parent, { text }, { me, models }) => {
+      if (!me) throw new ForbiddenError('You must be signed in to create messages.')
+
+      return models.Message.create({
+        text,
+        userId: me.id,
+      })
+    },
 
     updateMessage: (parent, { id, text }, { models }) => models.Message.update({
       text,

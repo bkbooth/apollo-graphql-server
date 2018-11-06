@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { AuthenticationError, UserInputError } from 'apollo-server'
+import { AuthenticationError, ForbiddenError, UserInputError } from 'apollo-server'
 
 function createToken({ id, email, username }, secret, expiresIn) {
   return jwt.sign({ id, email, username }, secret, { expiresIn })
@@ -10,9 +10,7 @@ export default {
     users: (parent, args, { models }) => models.User.findAll(),
     user: (parent, { id }, { models }) => models.User.findById(id),
     me: (parent, args, { me, models }) => {
-      if (!me) {
-        return null
-      }
+      if (!me) return null
 
       return models.User.findById(me.id)
     },
