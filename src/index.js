@@ -75,6 +75,7 @@ async function createUsersWithMessages() {
     username: 'mario',
     email: 'mario@example.com',
     password: 'mario123',
+    role: 'ADMIN',
     messages: [
       { text: 'Learning about GraphQL and Apollo!' },
       { text: 'This is another message...' },

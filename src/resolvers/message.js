@@ -18,7 +18,6 @@ export default {
     ),
 
     updateMessage: combineResolvers(
-      isAuthenticated,
       isMessageOwner,
       (parent, { id, text }, { models }) => models.Message.update({
         text,
@@ -29,7 +28,6 @@ export default {
     ),
 
     deleteMessage: combineResolvers(
-      isAuthenticated,
       isMessageOwner,
       (parent, { id }, { models }) => models.Message.destroy({
         where: { id },
