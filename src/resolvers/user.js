@@ -1,14 +1,15 @@
 export default {
   Query: {
-    users: (parent, args, { models }) => Object.values(models.users),
-    user: (parent, { id }, { models }) => models.users[id],
-    me: (parent, args, { me }) => me,
+    users: (parent, args, { models }) => models.User.findAll(),
+    user: (parent, { id }, { models }) => models.User.findById(id),
+    me: (parent, args, { me }) => models.User.findById(me.id),
   },
 
   User: {
-    firstName: user => user.username.split(' ')[0],
-    messages: (user, args, { models }) =>
-      Object.values(models.messages)
-        .filter(message => message.userId === user.id),
+    messages: (user, args, { models }) => models.Message.findAll({
+      where: {
+        userId: user.id,
+      },
+    }),
   },
 }
