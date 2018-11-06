@@ -54,6 +54,8 @@ sequelize.sync({ force: ERASE_DATABASE_ON_SYNC }).then(() => {
 async function createUsersWithMessages() {
   await models.User.create({
     username: 'mario',
+    email: 'mario@example.com',
+    password: 'mario123',
     messages: [
       { text: 'Learning about GraphQL and Apollo!' },
       { text: 'This is another message...' },
@@ -64,6 +66,8 @@ async function createUsersWithMessages() {
 
   await models.User.create({
     username: 'luigi',
+    email: 'luigi@example.com',
+    password: 'luigi123',
     messages: [
       { text: 'I\'m the green guy' },
       { text: 'I wish more people liked me' },
