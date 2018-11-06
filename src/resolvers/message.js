@@ -12,21 +12,12 @@ export default {
       userId: me.id,
     }),
 
-    // updateMessage: (parent, { id, text }, { models }) => {
-    //   const {
-    //     [id]: message,
-    //     ...otherMessages
-    //   } = models.messages
-    //   if (!message) throw new Error(`Message '${id}' doesn't exist`)
-
-    //   message.text = text
-    //   models.messages = {
-    //     message,
-    //     ...otherMessages,
-    //   }
-
-    //   return message
-    // },
+    updateMessage: (parent, { id, text }, { models }) => models.Message.update({
+      text,
+    },{
+      where: { id },
+      returning: true,
+    }).then(([_, [message]]) => message),
 
     deleteMessage: (parent, { id }, { models }) => models.Message.destroy({
       where: { id },
