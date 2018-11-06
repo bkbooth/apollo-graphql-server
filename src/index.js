@@ -1,16 +1,29 @@
 import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
-import { ApolloServer } from 'apollo-server-express'
+import jwt from 'jsonwebtoken'
+import { ApolloServer, AuthenticationError } from 'apollo-server-express'
 
 import schema from './schema'
 import resolvers from './resolvers'
 import models, { sequelize } from './models'
 
+const SECRET = process.env.SECRET
 const HOST = process.env.HOST || 'localhost'
 const PORT = process.env.PORT || 8000
 const GRAPHQL_PATH = 'graphql'
 const ERASE_DATABASE_ON_SYNC = true
+
+const getMe = req => {
+  const token = req.headers['x-token']
+  if (token) {
+    try {
+      return jwt.verify(token, SECRET)
+    } catch (err) {
+      throw new AuthenticationError('Your session has expired. Please signin again.')
+    }
+  }
+}
 
 const app = express()
 app.use(cors())
@@ -30,11 +43,15 @@ const server = new ApolloServer({
       message,
     }
   },
-  context: async () => ({
-    models,
-    me: await models.User.findByLogin('mario'),
-    secret: process.env.SECRET,
-  }),
+  context: async ({ req }) => {
+    const me = await getMe(req)
+
+    return {
+      models,
+      me,
+      secret: SECRET,
+    }
+  },
 })
 
 server.applyMiddleware({
