@@ -4,6 +4,8 @@ import userSchema from './user'
 import messageSchema from './message'
 
 const linkSchema = gql`
+  scalar DateTime
+
   type Query {
     _: Boolean
   }
