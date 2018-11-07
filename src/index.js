@@ -62,7 +62,7 @@ server.applyMiddleware({
 
 sequelize.sync({ force: ERASE_DATABASE_ON_SYNC }).then(() => {
   if (ERASE_DATABASE_ON_SYNC) {
-    createUsersWithMessages()
+    createUsersWithMessages(new Date())
   }
 
   app.listen({ host: HOST, port: PORT }, () => {
@@ -70,15 +70,21 @@ sequelize.sync({ force: ERASE_DATABASE_ON_SYNC }).then(() => {
   })
 })
 
-async function createUsersWithMessages() {
+async function createUsersWithMessages(date) {
   await models.User.create({
     username: 'mario',
     email: 'mario@example.com',
     password: 'mario123',
     role: 'ADMIN',
     messages: [
-      { text: 'Learning about GraphQL and Apollo!' },
-      { text: 'This is another message...' },
+      {
+        text: 'Learning about GraphQL and Apollo!',
+        createdAt: date.setSeconds(date.getSeconds() + 1),
+      },
+      {
+        text: 'This is another message...',
+        createdAt: date.setSeconds(date.getSeconds() + 1),
+      },
     ],
   }, {
     include: [models.Message],
@@ -89,8 +95,14 @@ async function createUsersWithMessages() {
     email: 'luigi@example.com',
     password: 'luigi123',
     messages: [
-      { text: 'I\'m the green guy' },
-      { text: 'I wish more people liked me' },
+      {
+        text: 'I\'m the green guy',
+        createdAt: date.setSeconds(date.getSeconds() + 1),
+      },
+      {
+        text: 'I wish more people liked me',
+        createdAt: date.setSeconds(date.getSeconds() + 1),
+      },
     ],
   }, {
     include: [models.Message],
