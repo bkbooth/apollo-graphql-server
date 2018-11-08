@@ -3,9 +3,7 @@ import { signIn } from './user-api'
 export async function getToken(login, password) {
   const {
     data: {
-      data: {
-        signIn: { token },
-      },
+      signIn: { token },
     },
   } = await signIn({ login, password })
 

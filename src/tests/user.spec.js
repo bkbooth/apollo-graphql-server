@@ -1,6 +1,8 @@
+import 'dotenv/config'
 import { expect } from 'chai'
+import jwt from 'jsonwebtoken'
 
-import { getAdminToken, getUserToken } from './utils'
+import { getUserToken } from './utils'
 import * as userApi from './user-api'
 
 describe('users', () => {
@@ -18,7 +20,7 @@ describe('users', () => {
       }
 
       const result = await userApi.getUser({ id: '1' })
-      expect(result.data).to.eql(expectedResult)
+      expect(result).to.eql(expectedResult)
     })
 
     it('returns null when user cannot be found', async () => {
@@ -29,7 +31,34 @@ describe('users', () => {
       }
 
       const result = await userApi.getUser({ id: '42' })
-      expect(result.data).to.eql(expectedResult)
+      expect(result).to.eql(expectedResult)
+    })
+  })
+
+  describe('signUp(username: String!, email: String!, password: String!): Token!', () => {
+    it('creates a user and returns a token', async () => {
+      const credentials = {
+        username: 'tester',
+        email: 'tester@example.com',
+        password: 'tester123',
+      }
+
+      const {
+        data: {
+          signUp: { token },
+        },
+      } = await userApi.signUp(credentials)
+      expect(token).to.exist
+
+      const { id } = jwt.verify(token, process.env.SECRET)
+      const {
+        data: {
+          user: { username, email, role },
+        },
+      } = await userApi.getUser({ id })
+      expect(username).to.eql(credentials.username)
+      expect(email).to.eql(credentials.email)
+      expect(role).to.eql('USER')
     })
   })
 
@@ -37,9 +66,7 @@ describe('users', () => {
     it('returns an error because only admins can delete a user', async () => {
       const token = await getUserToken()
 
-      const {
-        data: { errors },
-      } = await userApi.deleteUser({ id: '1' }, token)
+      const { errors } = await userApi.deleteUser({ id: '1' }, token)
 
       expect(errors[0].message).to.eql('You do not have permission.')
     })

@@ -15,7 +15,19 @@ export const getUser = variables =>
       }
     `,
     variables,
-  })
+  }).then(result => result.data)
+
+export const signUp = variables =>
+  axios.post(API_URL, {
+    query: `
+      mutation ($username: String!, $email: String!, $password: String!) {
+        signUp(username: $username, email: $email, password: $password) {
+          token
+        }
+      }
+    `,
+    variables,
+  }).then(result => result.data)
 
 export const signIn = variables =>
   axios.post(API_URL, {
@@ -27,7 +39,7 @@ export const signIn = variables =>
       }
     `,
     variables,
-  })
+  }).then(result => result.data)
 
 export const deleteUser = (variables, token) =>
   axios.post(API_URL, {
@@ -41,4 +53,4 @@ export const deleteUser = (variables, token) =>
     headers: {
       'x-token': token,
     },
-  })
+  }).then(result => result.data)
