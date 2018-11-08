@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon --exec babel-node src/index.js",
-    "test": "mocha --require @babel/register 'src/**/*.spec.js'"
+    "test": "mocha --require @babel/register 'src/**/*.spec.js'",
+    "test-server": "TEST_DATABASE=messenger_test npm start"
   },
   "keywords": [],
   "author": "Ben Booth <bkbooth@gmail.com>",

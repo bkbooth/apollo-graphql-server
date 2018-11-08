@@ -13,7 +13,7 @@ const SECRET = process.env.SECRET
 const HOST = process.env.HOST || 'localhost'
 const PORT = process.env.PORT || 8000
 const GRAPHQL_PATH = 'graphql'
-const ERASE_DATABASE_ON_SYNC = true
+const IS_TEST = !!process.env.TEST_DATABASE
 
 const getMe = req => {
   const token = req.headers['x-token']
@@ -70,8 +70,8 @@ server.applyMiddleware({
 const httpServer = http.createServer(app)
 server.installSubscriptionHandlers(httpServer)
 
-sequelize.sync({ force: ERASE_DATABASE_ON_SYNC }).then(() => {
-  if (ERASE_DATABASE_ON_SYNC) {
+sequelize.sync({ force: IS_TEST }).then(() => {
+  if (IS_TEST) {
     createUsersWithMessages(new Date())
   }
 

@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize'
 
-const DATABASE = process.env.DATABASE || 'postgres'
+const DATABASE = process.env.TEST_DATABASE || process.env.DATABASE || 'postgres'
 const DATABASE_USER = process.env.DATABASE_USER || 'postgres'
 const DATABASE_PASSWORD = process.env.DATABASE_PASSWORD || 'postgres'
 
