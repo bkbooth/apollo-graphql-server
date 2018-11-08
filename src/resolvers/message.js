@@ -3,6 +3,9 @@ import { combineResolvers } from 'graphql-resolvers'
 
 import { isAuthenticated, isMessageOwner } from './authorization'
 
+const toCursorHash = cursor => Buffer.from(cursor).toString('base64')
+const fromCursorHash = hash => Buffer.from(hash, 'base64').toString('ascii')
+
 export default {
   Query: {
     messages: async (parent, { cursor, limit = 100 }, { models }) => {
@@ -10,7 +13,7 @@ export default {
         ? {
           where: {
             createdAt: {
-              [Sequelize.Op.lt]: cursor,
+              [Sequelize.Op.lt]: fromCursorHash(cursor),
             },
           },
         }
@@ -29,7 +32,7 @@ export default {
         edges,
         pageInfo: {
           hasNextPage,
-          endCursor: edges[edges.length - 1].createdAt,
+          endCursor: toCursorHash(edges[edges.length - 1].createdAt.toString()),
         },
       }
     },
