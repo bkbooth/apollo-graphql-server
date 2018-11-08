@@ -104,6 +104,7 @@ async function createUsersWithMessages(date) {
     username: 'luigi',
     email: 'luigi@example.com',
     password: 'luigi123',
+    role: 'USER',
     messages: [
       {
         text: 'I\'m the green guy',
