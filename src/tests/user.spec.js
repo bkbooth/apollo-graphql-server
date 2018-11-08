@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 
-import * as userApi from './api'
+import { getAdminToken, getUserToken } from './utils'
+import * as userApi from './user-api'
 
 describe('users', () => {
   describe('user(id: String!): User', () => {
@@ -16,7 +17,7 @@ describe('users', () => {
         },
       }
 
-      const result = await userApi.user({ id: '1' })
+      const result = await userApi.getUser({ id: '1' })
       expect(result.data).to.eql(expectedResult)
     })
 
@@ -27,20 +28,14 @@ describe('users', () => {
         },
       }
 
-      const result = await userApi.user({ id: '42' })
+      const result = await userApi.getUser({ id: '42' })
       expect(result.data).to.eql(expectedResult)
     })
   })
 
   describe('deleteUser(id: String!): Boolean!', () => {
     it('returns an error because only admins can delete a user', async () => {
-      const {
-        data: {
-          data: {
-            signIn: { token },
-          },
-        },
-      } = await userApi.signIn({ login: 'luigi', password: 'luigi123' })
+      const token = await getUserToken()
 
       const {
         data: { errors },

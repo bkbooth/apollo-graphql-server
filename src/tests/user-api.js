@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const API_URL = 'http://localhost:8000/graphql'
 
-export const user = variables =>
+export const getUser = variables =>
   axios.post(API_URL, {
     query: `
       query ($id: ID!) {
