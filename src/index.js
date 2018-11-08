@@ -9,6 +9,7 @@ import DataLoader from 'dataloader'
 import schema from './schema'
 import resolvers from './resolvers'
 import models, { sequelize } from './models'
+import loaders from './loaders'
 
 const SECRET = process.env.SECRET
 const HOST = process.env.HOST || 'localhost'
@@ -25,18 +26,6 @@ const getMe = req => {
       throw new AuthenticationError('Your session has expired. Please signin again.')
     }
   }
-}
-
-const batchUsers = async (keys, models) => {
-  const users = await models.User.findAll({
-    where: {
-      id: {
-        $in: keys,
-      },
-    },
-  })
-
-  return keys.map(key => users.find(user => user.id === key))
 }
 
 const app = express()
@@ -62,6 +51,9 @@ const server = new ApolloServer({
     if (connection) {
       return {
         models,
+        loaders: {
+          user: new DataLoader(keys => loaders.user.batchUsers(keys, models)),
+        },
       }
     }
 
@@ -71,7 +63,7 @@ const server = new ApolloServer({
         me: await getMe(req),
         secret: SECRET,
         loaders: {
-          user: new DataLoader(keys => batchUsers(keys, models)),
+          user: new DataLoader(keys => loaders.user.batchUsers(keys, models)),
         },
       }
     }
