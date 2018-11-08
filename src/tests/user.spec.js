@@ -68,7 +68,7 @@ describe('users', () => {
         password: 'mario123',
       })
 
-      expect(errors[0].message).to.equal('Validation error')
+      expect(errors[0].message).to.eql('Validation error')
     })
 
     it('returns an error for invalid password', async () => {
@@ -78,7 +78,34 @@ describe('users', () => {
         password: 'test',
       })
 
-      expect(errors[0].message).to.equal('Validation len on password failed')
+      expect(errors[0].message).to.eql('Validation len on password failed')
+    })
+  })
+
+  describe('signIn(login: String!, password: String!): Token!', () => {
+    it('returns a token for signin with valid credentials', async () => {
+      const {
+        data: {
+          signIn: { token },
+        },
+      } = await userApi.signIn({ login: 'mario', password: 'mario123' })
+      expect(token).to.exist
+
+      const { id, email } = jwt.verify(token, process.env.SECRET)
+      expect(id).to.eql(1)
+      expect(email).to.eql('mario@example.com')
+    })
+
+    it('returns an error for unknown login', async () => {
+      const { errors } = await userApi.signIn({ login: 'uknown', password: 'mario123' })
+
+      expect(errors[0].message).to.eql('Invalid login or password.')
+    })
+
+    it('returns an error for invalid password', async () => {
+      const { errors } = await userApi.signIn({ login: 'mario', password: 'invalid' })
+
+      expect(errors[0].message).to.eql('Invalid login or password.')
     })
   })
 
