@@ -1,4 +1,5 @@
 import 'dotenv/config'
+import http from 'http'
 import express from 'express'
 import cors from 'cors'
 import jwt from 'jsonwebtoken'
@@ -44,13 +45,19 @@ const server = new ApolloServer({
       message,
     }
   },
-  context: async ({ req }) => {
-    const me = await getMe(req)
+  context: async ({ req, connection }) => {
+    if (connection) {
+      return {
+        models,
+      }
+    }
 
-    return {
-      models,
-      me,
-      secret: SECRET,
+    if (req) {
+      return {
+        models,
+        me: await getMe(req),
+        secret: SECRET,
+      }
     }
   },
 })
@@ -60,12 +67,15 @@ server.applyMiddleware({
   path: `/${GRAPHQL_PATH}`,
 })
 
+const httpServer = http.createServer(app)
+server.installSubscriptionHandlers(httpServer)
+
 sequelize.sync({ force: ERASE_DATABASE_ON_SYNC }).then(() => {
   if (ERASE_DATABASE_ON_SYNC) {
     createUsersWithMessages(new Date())
   }
 
-  app.listen({ host: HOST, port: PORT }, () => {
+  httpServer.listen({ host: HOST, port: PORT }, () => {
     console.log(`Apollo Server on http://${HOST}:${PORT}/${GRAPHQL_PATH}`)
   })
 })
