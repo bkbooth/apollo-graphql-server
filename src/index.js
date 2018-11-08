@@ -39,6 +39,8 @@ const batchUsers = async (keys, models) => {
   return keys.map(key => users.find(user => user.id === key))
 }
 
+const userLoader = new DataLoader(keys => batchUsers(keys, models))
+
 const app = express()
 app.use(cors())
 
@@ -71,7 +73,7 @@ const server = new ApolloServer({
         me: await getMe(req),
         secret: SECRET,
         loaders: {
-          user: new DataLoader(keys => batchUsers(keys, models)),
+          user: userLoader,
         },
       }
     }
