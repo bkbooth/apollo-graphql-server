@@ -4,6 +4,7 @@ import express from 'express'
 import cors from 'cors'
 import jwt from 'jsonwebtoken'
 import { ApolloServer, AuthenticationError } from 'apollo-server-express'
+import DataLoader from 'dataloader'
 
 import schema from './schema'
 import resolvers from './resolvers'
@@ -24,6 +25,18 @@ const getMe = req => {
       throw new AuthenticationError('Your session has expired. Please signin again.')
     }
   }
+}
+
+const batchUsers = async (keys, models) => {
+  const users = await models.User.findAll({
+    where: {
+      id: {
+        $in: keys,
+      },
+    },
+  })
+
+  return keys.map(key => users.find(user => user.id === key))
 }
 
 const app = express()
@@ -57,6 +70,9 @@ const server = new ApolloServer({
         models,
         me: await getMe(req),
         secret: SECRET,
+        loaders: {
+          user: new DataLoader(keys => batchUsers(keys, models)),
+        },
       }
     }
   },

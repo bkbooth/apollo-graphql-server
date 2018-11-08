@@ -82,6 +82,6 @@ export default {
   },
 
   Message: {
-    user: (message, args, { models }) => models.User.findById(message.userId),
+    user: (message, args, { loaders }) => loaders.user.load(message.userId),
   },
 }
