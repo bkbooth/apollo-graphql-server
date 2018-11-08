@@ -19,5 +19,16 @@ describe('users', () => {
       const result = await userApi.user({ id: '1' })
       expect(result.data).to.eql(expectedResult)
     })
+
+    it('returns null when user cannot be found', async () => {
+      const expectedResult = {
+        data: {
+          user: null,
+        },
+      }
+
+      const result = await userApi.user({ id: '42' })
+      expect(result.data).to.eql(expectedResult)
+    })
   })
 })
