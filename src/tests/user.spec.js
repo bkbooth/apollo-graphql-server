@@ -60,6 +60,26 @@ describe('users', () => {
       expect(email).to.eql(credentials.email)
       expect(role).to.eql('USER')
     })
+
+    it('returns a validation error for duplicate email or username', async () => {
+      const { errors } = await userApi.signUp({
+        username: 'mario',
+        email: 'mario@example.com',
+        password: 'mario123',
+      })
+
+      expect(errors[0].message).to.equal('Validation error')
+    })
+
+    it('returns an error for invalid password', async () => {
+      const { errors } = await userApi.signUp({
+        username: 'tester',
+        email: 'tester@example.com',
+        password: 'test',
+      })
+
+      expect(errors[0].message).to.equal('Validation len on password failed')
+    })
   })
 
   describe('deleteUser(id: String!): Boolean!', () => {
