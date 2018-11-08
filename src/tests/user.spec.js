@@ -2,7 +2,7 @@ import 'dotenv/config'
 import { expect } from 'chai'
 import jwt from 'jsonwebtoken'
 
-import { getUserToken } from './utils'
+import { createUser, getAdminToken, getUserToken } from './utils'
 import * as userApi from './user-api'
 
 describe('users', () => {
@@ -110,7 +110,18 @@ describe('users', () => {
   })
 
   describe('deleteUser(id: String!): Boolean!', () => {
-    it('returns an error because only admins can delete a user', async () => {
+    it('deletes the user if current user is admin', async () => {
+      const adminToken = await getAdminToken()
+      const { id } = await createUser('dummy', 'dummy@example.com', 'dummy123')
+
+      const {
+        data: { deleteUser: isDeleted }
+      } = await userApi.deleteUser({ id }, adminToken)
+
+      expect(isDeleted).to.be.true
+    })
+
+    it('returns a permisson error if current user is not admin', async () => {
       const token = await getUserToken()
 
       const { errors } = await userApi.deleteUser({ id: '1' }, token)

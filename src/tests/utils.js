@@ -1,4 +1,18 @@
-import { signIn } from './user-api'
+import jwt from 'jsonwebtoken'
+
+import { signIn, signUp } from './user-api'
+
+export async function createUser(username, email, password) {
+  const {
+    data: {
+      signUp: { token }
+    }
+  } = await signUp({ username, email, password })
+
+  const { id, role } = jwt.verify(token, process.env.SECRET)
+
+  return { token, id, username, email, role }
+}
 
 export async function getToken(login, password) {
   const {
