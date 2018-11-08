@@ -1,14 +1,23 @@
 import { expect } from 'chai'
 
+import * as userApi from './api'
+
 describe('users', () => {
-  it('user is user', async () => {
-    const done = await delay(true)
-    expect(done).to.be.true
+  describe('user(id: String!): User', () => {
+    it('returns a user when user can be found', async () => {
+      const expectedResult = {
+        data: {
+          user: {
+            id: '1',
+            username: 'mario',
+            email: 'mario@example.com',
+            role: 'ADMIN',
+          },
+        },
+      }
+
+      const result = await userApi.user({ id: '1' })
+      expect(result.data).to.eql(expectedResult)
+    })
   })
 })
-
-function delay(result, ms = 1000) {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(result), ms)
-  })
-}
