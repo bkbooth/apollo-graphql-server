@@ -62,6 +62,37 @@ describe('messages', () => {
     })
   })
 
+  describe('updateMessage(id: ID!, text: String!): Message!', () => {
+    let ownerToken, messageId
+
+    beforeEach(async () => {
+      ownerToken = await getUserToken()
+      const { id } = await createMessage('This is a test!', ownerToken)
+      messageId = id
+    })
+
+    afterEach(() => messageApi.deleteMessage({ id: messageId }, ownerToken))
+
+    it('updates the message if current user is the message owner', async () => {
+      const updatedText = 'This is updated!'
+
+      const {
+        data: { updateMessage: message }
+      } = await messageApi.updateMessage({ id: messageId, text: updatedText }, ownerToken)
+
+      expect(message.id).to.eql(messageId)
+      expect(message.text).to.eql(updatedText)
+    })
+
+
+    it('returns a permisson error if current user is not the message owner', async () => {
+      const otherToken = await getAdminToken()
+      const { errors } = await messageApi.updateMessage({ id: messageId, text: 'Updated!' }, otherToken)
+
+      expect(errors[0].message).to.eql('You are not the owner of this message.')
+    })
+  })
+
   describe('deleteMessage(id: ID!): Boolean!', () => {
     let ownerToken, messageId
 
