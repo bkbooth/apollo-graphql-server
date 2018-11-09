@@ -63,23 +63,27 @@ describe('messages', () => {
   })
 
   describe('deleteMessage(id: ID!): Boolean!', () => {
-    it('deletes the message if current user is the message owner', async () => {
-      const ownerToken = await getUserToken()
-      const { id } = await createMessage('This is a test!', ownerToken)
+    let ownerToken, messageId
 
+    beforeEach(async () => {
+      ownerToken = await getUserToken()
+      const { id } = await createMessage('This is a test!', ownerToken)
+      messageId = id
+    })
+
+    it('deletes the message if current user is the message owner', async () => {
       const {
         data: { deleteMessage: isDeleted }
-      } = await messageApi.deleteMessage({ id }, ownerToken)
+      } = await messageApi.deleteMessage({ id: messageId }, ownerToken)
 
       expect(isDeleted).to.be.true
     })
 
-    it('returns a permisson error if current user is not the message owner', async () => {
-      const ownerToken = await getUserToken()
-      const { id } = await createMessage('This is a test!', ownerToken)
+    after(() => messageApi.deleteMessage({ id: messageId }, ownerToken))
 
+    it('returns a permisson error if current user is not the message owner', async () => {
       const otherToken = await getAdminToken()
-      const { errors } = await messageApi.deleteMessage({ id }, otherToken)
+      const { errors } = await messageApi.deleteMessage({ id: messageId }, otherToken)
 
       expect(errors[0].message).to.eql('You are not the owner of this message.')
     })
