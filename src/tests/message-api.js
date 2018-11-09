@@ -39,3 +39,17 @@ export const createMessage = (variables, token) =>
       'x-token': token,
     },
   }).then(result => result.data)
+
+export const deleteMessage = (variables, token) =>
+  axios.post(API_URL, {
+    query: `
+      mutation ($id: ID!) {
+        deleteMessage(id: $id)
+      }
+    `,
+    variables,
+  }, {
+    headers: {
+      'x-token': token,
+    },
+  }).then(result => result.data)

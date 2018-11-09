@@ -1,19 +1,19 @@
 import 'dotenv/config'
 import { expect } from 'chai'
 
-import { getUserToken } from './utils'
+import { createMessage, getAdminToken, getUserToken } from './utils'
 import * as messageApi from './message-api'
 
 describe('messages', () => {
   describe('message(id: String!): Message', () => {
     it('returns a message when message can be found', async () => {
       const expectedMessage = {
-            id: '1',
-            text: 'Learning about GraphQL and Apollo!',
-            user: {
-              id: '1',
-              username: 'mario',
-            },
+        id: '1',
+        text: 'Learning about GraphQL and Apollo!',
+        user: {
+          id: '1',
+          username: 'mario',
+        },
       }
 
       const {
@@ -59,6 +59,29 @@ describe('messages', () => {
       } catch (err) {
         expect(err.response.status).to.eql(400)
       }
+    })
+  })
+
+  describe('deleteMessage(id: ID!): Boolean!', () => {
+    it('deletes the message if current user is the message owner', async () => {
+      const ownerToken = await getUserToken()
+      const { id } = await createMessage('This is a test!', ownerToken)
+
+      const {
+        data: { deleteMessage: isDeleted }
+      } = await messageApi.deleteMessage({ id }, ownerToken)
+
+      expect(isDeleted).to.be.true
+    })
+
+    it('returns a permisson error if current user is not the message owner', async () => {
+      const ownerToken = await getUserToken()
+      const { id } = await createMessage('This is a test!', ownerToken)
+
+      const otherToken = await getAdminToken()
+      const { errors } = await messageApi.deleteMessage({ id }, otherToken)
+
+      expect(errors[0].message).to.eql('You are not the owner of this message.')
     })
   })
 })
