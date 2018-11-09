@@ -8,30 +8,24 @@ import * as userApi from './user-api'
 describe('users', () => {
   describe('user(id: String!): User', () => {
     it('returns a user when user can be found', async () => {
-      const expectedResult = {
-        data: {
-          user: {
-            id: '1',
-            username: 'mario',
-            email: 'mario@example.com',
-            role: 'ADMIN',
-          },
-        },
+      const expectedUser = {
+        id: '1',
+        username: 'mario',
+        email: 'mario@example.com',
+        role: 'ADMIN',
       }
 
-      const result = await userApi.getUser({ id: '1' })
-      expect(result).to.eql(expectedResult)
+      const {
+        data: { user },
+      } = await userApi.getUser({ id: '1' })
+      expect(user).to.eql(expectedUser)
     })
 
     it('returns null when user cannot be found', async () => {
-      const expectedResult = {
-        data: {
-          user: null,
-        },
-      }
-
-      const result = await userApi.getUser({ id: '42' })
-      expect(result).to.eql(expectedResult)
+      const {
+        data: { user },
+      } = await userApi.getUser({ id: '42' })
+      expect(user).to.be.null
     })
   })
 
