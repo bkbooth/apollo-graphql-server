@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import { expect } from 'chai'
 
 import { createMessage, getAdminToken, getUserToken } from './utils'
