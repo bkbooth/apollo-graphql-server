@@ -1,37 +1,64 @@
 import 'dotenv/config'
 import { expect } from 'chai'
 
+import { getUserToken } from './utils'
 import * as messageApi from './message-api'
 
 describe('messages', () => {
   describe('message(id: String!): Message', () => {
     it('returns a message when message can be found', async () => {
-      const expectedResult = {
-        data: {
-          message: {
+      const expectedMessage = {
             id: '1',
             text: 'Learning about GraphQL and Apollo!',
             user: {
               id: '1',
               username: 'mario',
             },
-          },
-        },
       }
 
-      const result = await messageApi.getMessage({ id: '1' })
-      expect(result).to.eql(expectedResult)
+      const {
+        data: { message },
+      } = await messageApi.getMessage({ id: '1' })
+      expect(message).to.eql(expectedMessage)
     })
 
     it('returns null when message cannot be found', async () => {
-      const expectedResult = {
-        data: {
-          message: null,
-        },
-      }
+      const {
+        data: { message },
+      } = await messageApi.getMessage({ id: '42' })
+      expect(message).to.be.null
+    })
+  })
 
-      const result = await messageApi.getMessage({ id: '42' })
-      expect(result).to.eql(expectedResult)
+  describe('createMessage(text: String!): Message!', () => {
+    it('creates and returns the message', async () => {
+      const token = await getUserToken()
+      const text = 'This is a test!'
+
+      const {
+        data: { createMessage: message },
+      } = await messageApi.createMessage({ text }, token)
+
+      expect(message.id).to.be.a('string')
+      expect(message.text).to.eql(text)
+      expect(message.user.username).to.eql('luigi')
+    })
+
+    it('returns a validation error for empty message text', async () => {
+      const token = await getUserToken()
+
+      const { errors } = await messageApi.createMessage({ text: '' }, token)
+
+      expect(errors[0].message).to.eql('You must provide text for the message.')
+    })
+
+    it('returns an error when not authenticated', async () => {
+      const token = 'an.invalid.token'
+      try {
+        await messageApi.createMessage({ tesxt: 'This is a test!' }, token)
+      } catch (err) {
+        expect(err.response.status).to.eql(400)
+      }
     })
   })
 })

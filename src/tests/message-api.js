@@ -18,3 +18,24 @@ export const getMessage = variables =>
     `,
     variables,
   }).then(result => result.data)
+
+export const createMessage = (variables, token) =>
+  axios.post(API_URL, {
+    query: `
+      mutation ($text: String!) {
+        createMessage(text: $text) {
+          id
+          text
+          user {
+            id
+            username
+          }
+        }
+      }
+    `,
+    variables,
+  }, {
+    headers: {
+      'x-token': token,
+    },
+  }).then(result => result.data)
